@@ -10,7 +10,6 @@ void loop(){
   }
   gelenSayi=Serial.parseInt();
 
-  Serial.print("girdiginiz syi:");
+  Serial.print("girdiginiz sayi:");
   Serial.print(gelenSayi);
-  Serial.println("dir.");
 }
