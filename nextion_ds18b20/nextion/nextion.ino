@@ -30,11 +30,13 @@ void loop() {
   } else {
     Serial.print("Sıcaklık: ");
     Serial.print(temperatureC);
-    Serial.println(" °C");
+    Serial.println(" °C");  
     
     // Nextion ekranına sıcaklık verisini gönder
-    String tempStr = "t0.txt=\"" + String(temperatureC) + " °C\"";
+    String tempStr = "t0.txt=\"" + String(temperatureC) + " ";
     nextion.print(tempStr);
+    nextion.write(176);   // Derece sembolü için ASCII değeri
+    nextion.print("C\"");
     nextion.write(0xff);   // Nextion komutu bitirme karakterleri
     nextion.write(0xff);
     nextion.write(0xff);
