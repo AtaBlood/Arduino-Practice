@@ -47,7 +47,7 @@ void loop() {
     nextion.write(0xff);
     
     // Progress bar değerini ayarla
-    int progressValue = map(temperatureC, 0, 50, 0, 100); // Sıcaklığı 0-100 aralığına eşle
+    int progressValue = map(temperatureC, 0, 100, 0, 100); // Sıcaklığı 0-100 aralığına eşle
     String progressStr = "j0.val=" + String(progressValue);
     nextion.print(progressStr);
     nextion.write(0xff);
