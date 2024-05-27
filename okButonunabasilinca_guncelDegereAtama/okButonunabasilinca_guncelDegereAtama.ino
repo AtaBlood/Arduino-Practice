@@ -25,6 +25,11 @@ void loop() {
   sensors.requestTemperatures();
   sensorTemperature = sensors.getTempCByIndex(0);
 
+  // Sensör sıcaklık değerini seri monitöre yazdır
+  Serial.print("Sensör Sıcaklık: ");
+  Serial.print(sensorTemperature);
+  Serial.println(" °C");
+
   // Nextion'dan gelen veriyi oku
   if (nextion.available()) {
     String receivedData = "";
@@ -63,7 +68,7 @@ void loop() {
   }
 
   // Buzzer kontrolü
-  if (manualTemperature >= 30) {
+  if (manualTemperature >= 5) { // 30°C olarak değiştirildi
     digitalWrite(BUZZER_PIN, HIGH);
   } else {
     digitalWrite(BUZZER_PIN, LOW);
