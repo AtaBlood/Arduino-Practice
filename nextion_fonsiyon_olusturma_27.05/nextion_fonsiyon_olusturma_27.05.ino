@@ -73,7 +73,7 @@ void nextionVerisiGonder() {
 
   String sensorSicaklikStr = "t0.txt=\"" + String(sensorSicakligi, 2) + " "; // Sensör sıcaklık değerini stringe dönüştürür
   nextion.print(sensorSicaklikStr); // Nextion ekranına gönderir
-  nextion.write(176); // Derece sembolü gönderir
+  nextion.write(176); // Derece sembolü gönderir.ASCII tablosunda, 176 numaralı karakter derece sembolüne karşılık gelir.
   nextion.print("C\"");
   nextion.write(0xff); // Komut sonlandırma baytları
   nextion.write(0xff);
@@ -82,7 +82,7 @@ void nextionVerisiGonder() {
 
 // Buzzer kontrol eden fonksiyon
 void buzzerKontrol() {
-  if (manuelSicaklik >= 5) { // Eğer manuel sıcaklık değeri 30°C veya üstündeyse
+  if (manuelSicaklik >= 5) { // Eğer manuel sıcaklık değeri 5°C veya üstündeyse
     digitalWrite(BUZZER_PIN, HIGH); // Buzzer'ı açar
   } else {
     digitalWrite(BUZZER_PIN, LOW); // Buzzer'ı kapatır
