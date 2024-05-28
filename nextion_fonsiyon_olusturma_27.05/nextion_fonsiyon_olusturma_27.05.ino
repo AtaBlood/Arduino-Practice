@@ -82,7 +82,7 @@ void nextionVerisiGonder() {
 
 // Buzzer kontrol eden fonksiyon
 void buzzerKontrol() {
-  if (manuelSicaklik >= 5) { // Eğer manuel sıcaklık değeri 5°C veya üstündeyse
+  if (manuelSicaklik >= 10) { // Eğer manuel sıcaklık değeri 5°C veya üstündeyse
     digitalWrite(BUZZER_PIN, HIGH); // Buzzer'ı açar
   } else {
     digitalWrite(BUZZER_PIN, LOW); // Buzzer'ı kapatır
