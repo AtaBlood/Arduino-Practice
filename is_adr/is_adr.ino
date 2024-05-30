@@ -56,6 +56,15 @@ void nextionVerisiAl() {
 
 // Nextion ekranına veri gönderen fonksiyon
 void nextionVerisiGonder(string veriTipi,string veriAdresi,String veri) {
+  if(){
+    
+  }
+  else if(){
+
+  }
+  else {
+    
+  }
   String sicaklikStr = "t1.txt=\"" + String(manuelSicaklik, 2) + " "; // Manuel sıcaklık değerini stringe dönüştürür
   nextion.print(sicaklikStr); // Nextion ekranına gönderir
   nextion.write(176); // Derece sembolü gönderir
