@@ -1,126 +1,99 @@
-#include "OV7670.h"
-
-#include <Adafruit_GFX.h>    // Core graphics library
-
 #include <WiFi.h>
-#include <WiFiMulti.h>
-#include <WiFiClient.h>
-#include "BMP.h"
+#include <HTTPClient.h>
+#include "OV7670.h"
+#include <SPIFFS.h>
 
-const int SIOD = 21; //SDA
-const int SIOC = 22; //SCL
+#define SIOD 21
+#define SIOC 22
+#define VSYNC 15
+#define HREF 2
+#define XCLK 13
+#define PCLK 4
+#define D0 35
+#define D1 32
+#define D2 33
+#define D3 25
+#define D4 26 
+#define D5 27
+#define D6 14
+#define D7 12
 
-const int VSYNC = 15;
-const int HREF = 2;
-
-const int XCLK = 13;
-const int PCLK = 4;
-
-const int D0 = 35;
-const int D1 = 32;
-const int D2 = 33;
-const int D3 = 25;
-const int D4 = 26;
-const int D5 = 27;
-const int D6 = 14;
-const int D7 = 12;
-
-//DIN <- MOSI 23
-//CLK <- SCK 18
-
-#define ssid1        "net"
-#define password1    "boran123.."
+#define ssid        "İbrahim"      // WiFi ağınızın adı
+#define password    "44444444"  // WiFi şifreniz
 
 OV7670 *camera;
 
-WiFiMulti wifiMulti;
-WiFiServer server(80);
-
-unsigned char bmpHeader[BMP::headerSize];
-
-void serve()
-{
-  WiFiClient client = server.available();
-  if (client) 
-  {
-    //Serial.println("New Client.");
-    String currentLine = "";
-    while (client.connected()) 
-    {
-      if (client.available()) 
-      {
-        char c = client.read();
-        
-        if (c == '\n') 
-        {
-          if (currentLine.length() == 0) 
-          {
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:text/html");
-            client.println();
-            client.print(
-              "<style>body{margin: 0}\nimg{height: 100%; width: auto}</style>"
-              "<img id='a' src='/camera' onload='this.style.display=\"initial\"; var b = document.getElementById(\"b\"); b.style.display=\"none\"; b.src=\"camera?\"+Date.now(); '>"
-              "<img id='b' style='display: none' src='/camera' onload='this.style.display=\"initial\"; var a = document.getElementById(\"a\"); a.style.display=\"none\"; a.src=\"camera?\"+Date.now(); '>");
-            client.println();
-            break;
-          } 
-          else 
-          {
-            currentLine = "";
-          }
-        } 
-        else if (c != '\r') 
-        {
-          currentLine += c;
-        }
-        
-        if(currentLine.endsWith("GET /camera"))
-        {
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type:image/bmp");
-            client.println();
-            
-            client.write(bmpHeader, BMP::headerSize);
-            client.write(camera->frame, camera->xres * camera->yres * 2);
-        }
-      }
-    }
-    // close the connection:
-    client.stop();
-    Serial.println("Client Disconnected.");
-  }  
-}
-
-void setup() 
-{
-  Serial.begin(115200);
-
-  wifiMulti.addAP(ssid1, password1);
-  
-  Serial.println("Connecting Wifi...");
-  if(wifiMulti.run() == WL_CONNECTED) {
-      Serial.println("");
-      Serial.println("WiFi connected");
-      Serial.println("IP address: ");
-      Serial.println(WiFi.localIP());
+void uploadPhoto(const char* serverName) {
+  File file = SPIFFS.open("/photo.jpg", FILE_READ);
+  if (!file) {
+    Serial.println("Failed to open file for reading");
+    return;
   }
 
-  Serial.println("Camera init started.");  
-  camera = new OV7670(OV7670::Mode::QQVGA_RGB565, SIOD, SIOC, VSYNC, HREF, XCLK, PCLK, D0, D1, D2, D3, D4, D5, D6, D7);
-  Serial.println("Camera inited.");
+  HTTPClient http;
+  http.begin(serverName);
+  http.addHeader("Content-Type", "multipart/form-data");
 
-  Serial.println("BMP init started.");
-  BMP::construct16BitHeader(bmpHeader, camera->xres, camera->yres);
-  Serial.println("BMP inited.");
-  
-  Serial.println("Server beginning.");
-  server.begin();
-  Serial.println("Server started.");
+  int httpResponseCode = http.sendRequest("POST", &file, file.size());
+
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.println(httpResponseCode);
+    Serial.println(response);
+  } else {
+    Serial.print("Error on sending POST: ");
+    Serial.println(httpResponseCode);
+  }
+
+  file.close();
+  http.end();
 }
 
-void loop()
-{
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting to WiFi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println("Connected to WiFi");
+
+  if (!SPIFFS.begin(true)) {
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
+
+  // Initialize the camera with lower resolution and color depth
+  camera = new OV7670(OV7670::Mode::QQVGA_RGB565, SIOD, SIOC, VSYNC, HREF, XCLK, PCLK, D0, D1, D2, D3, D4, D5, D6, D7);
+}
+
+void loop() {
+  // Capture a frame
   camera->oneFrame();
-  serve();
+
+  // Create a temporary file to store the image
+  File file = SPIFFS.open("/photo.jpg", FILE_WRITE); // Dosya adını .jpg olarak değiştirdik
+  if (!file) {
+    Serial.println("Failed to create file");
+    return;
+  }
+
+  // Write frame buffer to file in JPEG format
+  size_t bytesWritten = file.write(camera->frame, camera->xres * camera->yres * 2); // Tüm kareyi dosyaya yazdık
+  if (bytesWritten != camera->xres * camera->yres * 2) {
+    Serial.println("Error writing to file");
+    file.close();
+    return;
+  }
+
+  Serial.println("Frame buffer written.");
+  file.close();
+  Serial.println("File closed.");
+
+  // Upload the photo to the server
+  uploadPhoto("http://waspopy.pythonanywhere.com/upload");
+
+  delay(20000);   // Wait 5 seconds before taking another photo
 }

@@ -3,8 +3,8 @@
 #include <SoftwareSerial.h>  // SoftwareSerial kütüphanesini dahil edin
 
 #define ONE_WIRE_BUS 8
-#define RX_PIN 10 // Nextion ekranının TX pinine bağlanacak Arduino pini
-#define TX_PIN 11  // Nextion ekranının RX pinine bağlanacak Arduino pini
+#define RX_PIN 50 // Nextion ekranının TX pinine bağlanacak Arduino pini
+#define TX_PIN 51  // Nextion ekranının RX pinine bağlanacak Arduino pini
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
@@ -38,7 +38,7 @@ void loop() {
     nextion.write(176);   // Derece sembolü için ASCII değeri
     nextion.print("C\"");
     nextion.write(0xff);   // Nextion komutu bitirme karakterleri
-    nextion.write(0xff);
+    nextion.write(0xff);  
     nextion.write(0xff);
   }
   
