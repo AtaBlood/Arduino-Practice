@@ -12,3 +12,6 @@ void loop(){
   }
   delay(15);
 }
+
+
+//UART ÜZERİNDEN HABERLEŞME(RX-TX)

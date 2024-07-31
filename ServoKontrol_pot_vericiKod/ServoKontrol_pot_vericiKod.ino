@@ -10,3 +10,5 @@ void loop(){
   Serial.write(val);
   delay(15);
 }
+
+//2 KART ARASI UART ÜZERİNDEN HABERLEŞME(RX-TX)
